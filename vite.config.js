@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
         "@util": path.resolve("src/util"),
         "@styles": path.resolve("src/styles"),
         "@pages": path.resolve("src/pages"),
+        "@assets": path.resolve("src/assets"),
       },
     },
   };
