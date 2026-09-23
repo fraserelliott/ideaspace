@@ -99,3 +99,17 @@ th {
 .panel {
   width: clamp(250px, 80vw, 1000px);
 }
+
+.panel-small {
+  width: clamp(250px, 80vw, 350px);
+}
+
+.bg-subtle {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

@@ -1,13 +1,18 @@
 import { UI } from "@/styles";
 import { useIdeas } from "@/contexts/IdeasContext";
 import { formatDate } from "@/utils/dateUtil";
+import { ErrorMessage } from "./ErrorMessage";
 
-export function IdeaTable() {
+export function IdeaTable({ publishedOnly }) {
   const { loading, error, ideas } = useIdeas();
 
-  if (error) return <h1>Placeholder error. {error}</h1>;
+  if (error) return <ErrorMessage message={error.message} />;
 
-  if (loading) return <h1>Placeholder loading.</h1>;
+  if (loading) return;
+
+  const displayedIdeas = publishedOnly
+    ? ideas.filter((idea) => idea.slug)
+    : ideas;
 
   return (
     <div className={UI.Panel()} style={{ overflowX: "auto" }}>
@@ -21,7 +26,7 @@ export function IdeaTable() {
           </tr>
         </thead>
         <tbody>
-          {ideas.map((entry) => {
+          {displayedIdeas.map((entry) => {
             return (
               <tr key={entry.id} className="fe-p-em-1">
                 <td>{entry.name}</td>

@@ -5,14 +5,17 @@ import "./index.css";
 import App from "./App.jsx";
 import { ToastProvider } from "@fraserelliott/fe-components";
 import { ApiProvider } from "./contexts/ApiContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { IdeasProvider } from "./contexts/IdeasContext";
 
 createRoot(document.getElementById("root")).render(
   <ToastProvider>
     <ApiProvider>
-      <IdeasProvider>
-        <App />
-      </IdeasProvider>
+      <AuthProvider>
+        <IdeasProvider>
+          <App />
+        </IdeasProvider>
+      </AuthProvider>
     </ApiProvider>
   </ToastProvider>
 );

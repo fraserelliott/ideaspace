@@ -13,6 +13,7 @@ export function IdeasProvider({ children }) {
 
   useEffect(() => {
     let mounted = true;
+    setLoading(true);
     (async () => {
       await Promise.all([
         runApi(
