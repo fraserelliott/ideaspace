@@ -1,10 +1,15 @@
-import "./App.css";
+import "@fraserelliott/fe-components/stylesheet";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Header } from "@components/Header";
 import { Footer } from "@components/Footer";
-import { UI } from "@styles";
-import { HomePage } from "@/pages/HomePage";
+import {
+  ToastMessageDisplay,
+  OptionalPortal,
+} from "@fraserelliott/fe-components";
+import HomePage from "@/pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import LogoutPage from "./pages/LogoutPage";
+import DashboardPage from "./pages/DashboardPage";
 
 const repo = "/ideaspace/";
 const basename = import.meta.env.PROD ? repo : "/";
@@ -17,9 +22,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/logout" element={<LogoutPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
         <Footer />
       </BrowserRouter>
+      <OptionalPortal portalTarget={document.body}>
+        <ToastMessageDisplay />
+      </OptionalPortal>
     </>
   );
 }

@@ -1,6 +1,15 @@
-import { createContext, useState, useEffect, useContext, useMemo } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import api from "../api";
 import { useApi } from "./ApiContext.jsx";
+import { useToast } from "@fraserelliott/fe-components";
+import { useAuth } from "./AuthContext";
 
 const IdeasContext = createContext(undefined);
 
@@ -9,30 +18,60 @@ export function IdeasProvider({ children }) {
   const [error, setError] = useState(null);
   const [ideas, setIdeas] = useState([]);
 
-  const { runApi } = useApi();
+  const { runApiCallback, runApiTransform } = useApi();
+  const { addToastMessage } = useToast();
+  const { token, authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
+
     let mounted = true;
     setLoading(true);
+
     (async () => {
       await Promise.all([
-        runApi(
-          api.get("/api/ideaspace/ideas"),
-          (d) => mounted && setIdeas(d),
+        runApiCallback(
+          api.get(
+            token ? "/api/ideaspace/ideas/dashboard" : "/api/ideaspace/ideas"
+          ),
+          (d) =>
+            mounted &&
+            setIdeas(
+              d.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+            ),
           "Error fetching ideas",
           () => mounted && setError(new Error("Failed to load ideas"))
         ),
       ]);
       if (mounted) setLoading(false);
     })();
+
     return () => {
       mounted = false;
     };
-  }, [runApi]);
+  }, [runApiCallback, token, authLoading]);
+
+  const validateNameAsync = useCallback(
+    async (name, excludeId) =>
+      runApiTransform(
+        api.post("/api/ideaspace/ideas/validate-name", { name, excludeId }),
+        (data) => data.valid,
+        (err) => (err?.response?.status === 409 ? false : null)
+      ),
+    [runApiTransform]
+  );
+
+  const createIdeaAsync = useCallback(async (idea) => {
+    return await runApiCallback(
+      api.post("/api/ideaspace/ideas", idea),
+      (newIdea) => setIdeas((prev) => [newIdea, ...prev]),
+      "Error creating idea."
+    );
+  }, []);
 
   const value = useMemo(
-    () => ({ loading, error, ideas }),
-    [loading, error, ideas]
+    () => ({ loading, error, ideas, validateNameAsync, createIdeaAsync }),
+    [loading, error, ideas, validateNameAsync, createIdeaAsync]
   );
 
   return (

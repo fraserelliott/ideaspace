@@ -1,9 +1,8 @@
 import { cx } from "@fraserelliott/fe-utilities/cx";
 
 export const appearance = {
-  Panel: "fes-bg-secondary fes-glass-border fes-shadow-subtle fe-rounded-1",
-  BtnPrimary: "fes-btn-primary",
-  BtnDanger: "fes-btn-danger",
+  Panel: "bg-secondary fes-glass-border fes-shadow-subtle fe-rounded-1",
+  BtnPrimary: "btn-primary",
 };
 
 export const UI = {

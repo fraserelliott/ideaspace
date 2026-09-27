@@ -3,7 +3,7 @@ import { useIdeas } from "@/contexts/IdeasContext";
 import { formatDate } from "@/utils/dateUtil";
 import { ErrorMessage } from "./ErrorMessage";
 
-export function IdeaTable({ publishedOnly }) {
+export function IdeaTable({ publishedOnly, renderSlug }) {
   const { loading, error, ideas } = useIdeas();
 
   if (error) return <ErrorMessage message={error.message} />;
@@ -22,6 +22,7 @@ export function IdeaTable({ publishedOnly }) {
             <th className={UI.Heading()}>Name</th>
             <th className={UI.Heading()}>Tags</th>
             <th className={UI.Heading()}>Idea?</th>
+            {renderSlug && <th className={UI.Heading()}>Slug</th>}
             <th className={UI.Heading()}>Last updated</th>
           </tr>
         </thead>
@@ -32,6 +33,7 @@ export function IdeaTable({ publishedOnly }) {
                 <td>{entry.name}</td>
                 <td>{renderTags(entry.ideatags)}</td>
                 <td>{entry.isIdea ? "\u2713" : "\u2717"}</td>
+                {renderSlug && <td>{entry.slug}</td>}
                 <td>{formatDate(entry.updatedAt)}</td>
               </tr>
             );

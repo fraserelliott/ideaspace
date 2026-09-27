@@ -21,7 +21,7 @@ export function ApiProvider({ children }) {
     [addToastMessage]
   );
 
-  const runApi = useCallback(
+  const runApiCallback = useCallback(
     async (promise, onSuccess, fallbackMsg, onError) => {
       try {
         const { data } = await promise;
@@ -44,12 +44,28 @@ export function ApiProvider({ children }) {
     [handleApiError, addToastMessage]
   );
 
+  const runApiTransform = useCallback(
+    async (promise, successTransform, errorTransform) => {
+      let data;
+
+      try {
+        ({ data } = await promise);
+      } catch (err) {
+        return errorTransform ? errorTransform(err) : err;
+      }
+
+      return successTransform ? successTransform(data) : data;
+    },
+    []
+  );
+
   const value = useMemo(
     () => ({
-      runApi,
+      runApiCallback,
+      runApiTransform,
       registerUnauthorisedHandler,
     }),
-    [runApi, registerUnauthorisedHandler]
+    [runApiCallback, runApiTransform, registerUnauthorisedHandler]
   );
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

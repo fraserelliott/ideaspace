@@ -12,7 +12,7 @@ import api from "../api";
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
-  const { runApi, registerUnauthorisedHandler } = useApi();
+  const { runApiCallback, registerUnauthorisedHandler } = useApi();
   const [token, setToken] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      await runApi(
+      await runApiCallback(
         api.post("/api/auth/verify"),
         () => {
           if (mounted) setToken(storedToken);
@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [runApi]);
+  }, [runApiCallback]);
 
   // Persist token to localStorage
   useEffect(() => {
@@ -53,13 +53,13 @@ export function AuthProvider({ children }) {
 
   const loginAsync = useCallback(
     async (email, password) => {
-      return runApi(
+      return runApiCallback(
         api.post("/api/users/login", { email, password }),
         (data) => setToken(data.token),
         "Error logging in"
       );
     },
-    [runApi]
+    [runApiCallback]
   );
 
   const logout = useCallback(() => {
@@ -82,11 +82,12 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       token,
+      authLoading,
       loginAsync,
       logout,
       isOptimisticallyLoggedIn,
     }),
-    [token, loginAsync, logout, isOptimisticallyLoggedIn]
+    [token, authLoading, loginAsync, logout, isOptimisticallyLoggedIn]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

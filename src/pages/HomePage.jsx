@@ -1,5 +1,5 @@
 import { IdeaTable } from "@/components/IdeaTable";
 
-export function HomePage() {
-  return <IdeaTable />;
+export default function HomePage() {
+  return <IdeaTable publishedOnly />;
 }
