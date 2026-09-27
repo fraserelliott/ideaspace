@@ -23,7 +23,7 @@ export default function DashboardPage() {
       >
         New Idea
       </button>
-      <IdeaTable renderSlug />
+      <IdeaTable renderSlug renderDeleteBtn />
       {newIdeaDialogOpen && (
         <NewIdeaModal
           open={newIdeaDialogOpen}
@@ -40,10 +40,6 @@ function NewIdeaModal({ open, onOpenChange, style }) {
   const { validateNameAsync, createIdeaAsync } = useIdeas();
   const { register, handleSubmit, setFocus } = useForm();
   const { addToastMessage } = useToast();
-
-  useEffect(() => {
-    console.log(`Open changed. New value: ${open}`);
-  }, [open]);
 
   const submitForm = async (data) => {
     const valid = await validateNameAsync(data.name);

@@ -61,17 +61,38 @@ export function IdeasProvider({ children }) {
     [runApiTransform]
   );
 
-  const createIdeaAsync = useCallback(async (idea) => {
-    return await runApiCallback(
-      api.post("/api/ideaspace/ideas", idea),
-      (newIdea) => setIdeas((prev) => [newIdea, ...prev]),
-      "Error creating idea."
-    );
-  }, []);
+  const createIdeaAsync = useCallback(
+    async (idea) => {
+      return await runApiCallback(
+        api.post("/api/ideaspace/ideas", idea),
+        (newIdea) => setIdeas((prev) => [newIdea, ...prev]),
+        "Error creating idea."
+      );
+    },
+    [runApiCallback]
+  );
+
+  const deleteIdeaAsync = useCallback(
+    async (id) => {
+      return await runApiCallback(
+        api.delete(`/api/ideaspace/ideas/${id}`),
+        () => setIdeas((prev) => prev.filter((entry) => entry.id !== id)),
+        "Error deleting idea."
+      );
+    },
+    [runApiCallback]
+  );
 
   const value = useMemo(
-    () => ({ loading, error, ideas, validateNameAsync, createIdeaAsync }),
-    [loading, error, ideas, validateNameAsync, createIdeaAsync]
+    () => ({
+      loading,
+      error,
+      ideas,
+      validateNameAsync,
+      createIdeaAsync,
+      deleteIdeaAsync,
+    }),
+    [loading, error, ideas, validateNameAsync, createIdeaAsync, deleteIdeaAsync]
   );
 
   return (
