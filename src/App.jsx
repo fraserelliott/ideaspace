@@ -10,6 +10,8 @@ import HomePage from "@/pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import LogoutPage from "./pages/LogoutPage";
 import DashboardPage from "./pages/DashboardPage";
+import IdeaPage from "./pages/IdeaPage";
+import PageNotFound from "./pages/PageNotFound";
 
 const repo = "/ideaspace/";
 const basename = import.meta.env.PROD ? repo : "/";
@@ -24,6 +26,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/logout" element={<LogoutPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/ideas/:slug" element={<IdeaPage />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
         <Footer />
       </BrowserRouter>

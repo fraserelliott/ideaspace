@@ -20,10 +20,10 @@ const smallModalStyle = {
 export default function DashboardPage() {
   const [newIdeaDialogOpen, setNewIdeaDialogOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState(null);
-  const { getIdeaDetailsAsync } = useIdeas();
+  const { getIdeaDetailsByIdAsync } = useIdeas();
 
   const openEditor = async (entry) => {
-    const idea = await getIdeaDetailsAsync(entry.id, true);
+    const idea = await getIdeaDetailsByIdAsync(entry.id);
     if (idea) setEditingIdea(idea);
   };
 
@@ -179,6 +179,7 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
   const discardChanges = () => {
     reset();
     setIsValidName(null);
+    setIsValidSlug(null);
   };
 
   const validateNameField = async (name) => {

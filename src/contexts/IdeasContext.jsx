@@ -108,14 +108,21 @@ export function IdeasProvider({ children }) {
     [runApiCallback, fetchIdeatagsAsync]
   );
 
-  const getIdeaDetailsAsync = useCallback(
-    async (id, authenticated) => {
+  const getIdeaDetailsByIdAsync = useCallback(
+    async (id) => {
       return await runApiTransform(
-        api.get(
-          authenticated
-            ? `/api/ideaspace/ideas/dashboard/${id}`
-            : `/api/ideaspace/ideas/${id}`
-        )
+        api.get(`/api/ideaspace/ideas/dashboard/${id}`)
+      );
+    },
+    [runApiTransform]
+  );
+
+  const getIdeaDetailsBySlugAsync = useCallback(
+    async (slug) => {
+      return await runApiTransform(
+        api.get(`/api/ideaspace/ideas/${slug}`),
+        null,
+        (err) => null
       );
     },
     [runApiTransform]
@@ -163,7 +170,8 @@ export function IdeasProvider({ children }) {
       validateSlugAsync,
       createIdeaAsync,
       deleteIdeaAsync,
-      getIdeaDetailsAsync,
+      getIdeaDetailsByIdAsync,
+      getIdeaDetailsBySlugAsync,
       updateIdeaAsync,
       addIdeatagAsync,
     }),
@@ -176,7 +184,8 @@ export function IdeasProvider({ children }) {
       validateSlugAsync,
       createIdeaAsync,
       deleteIdeaAsync,
-      getIdeaDetailsAsync,
+      getIdeaDetailsByIdAsync,
+      getIdeaDetailsBySlugAsync,
       updateIdeaAsync,
       addIdeatagAsync,
     ]

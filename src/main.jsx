@@ -7,14 +7,17 @@ import { ToastProvider } from "@fraserelliott/fe-components";
 import { ApiProvider } from "./contexts/ApiContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { IdeasProvider } from "./contexts/IdeasContext";
+import { ImagesProvider } from "./contexts/ImagesContext";
 
 createRoot(document.getElementById("root")).render(
   <ToastProvider>
     <ApiProvider>
       <AuthProvider>
-        <IdeasProvider>
-          <App />
-        </IdeasProvider>
+        <ImagesProvider>
+          <IdeasProvider>
+            <App />
+          </IdeasProvider>
+        </ImagesProvider>
       </AuthProvider>
     </ApiProvider>
   </ToastProvider>
