@@ -2,20 +2,27 @@ import { appearance, UI } from "@/styles";
 import { useIdeas } from "@/contexts/IdeasContext";
 import { formatDate } from "@/utils/dateUtil";
 import { ErrorMessage } from "./ErrorMessage";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { OptionalPortal, ConfirmDialog } from "@fraserelliott/fe-components";
 
-export function IdeaTable({ publishedOnly, renderSlug, renderDeleteBtn }) {
+export function IdeaTable({
+  publishedOnly,
+  renderSlug,
+  renderDeleteBtn,
+  actionLabel,
+  onAction,
+}) {
   const { loading, error, ideas, deleteIdeaAsync } = useIdeas();
   const [pendingDelete, setPendingDelete] = useState(null);
+
+  const displayedIdeas = useMemo(
+    () => (publishedOnly ? ideas.filter((idea) => idea.slug) : ideas),
+    [ideas, publishedOnly]
+  );
 
   if (error) return <ErrorMessage message={error.message} />;
 
   if (loading) return;
-
-  const displayedIdeas = publishedOnly
-    ? ideas.filter((idea) => idea.slug)
-    : ideas;
 
   const onConfirmDelete = () => {
     setPendingDelete(null);
@@ -32,6 +39,9 @@ export function IdeaTable({ publishedOnly, renderSlug, renderDeleteBtn }) {
             <th className={UI.Heading()}>Idea?</th>
             {renderSlug && <th className={UI.Heading()}>Slug</th>}
             <th className={UI.Heading()}>Last updated</th>
+            {actionLabel && onAction && (
+              <th className={UI.Heading()}>{actionLabel}</th>
+            )}
             {renderDeleteBtn && <th className={UI.Heading()}>Delete</th>}
           </tr>
         </thead>
@@ -44,11 +54,21 @@ export function IdeaTable({ publishedOnly, renderSlug, renderDeleteBtn }) {
                 <td>{entry.isIdea ? "\u2713" : "\u2717"}</td>
                 {renderSlug && <td>{entry.slug}</td>}
                 <td>{formatDate(entry.updatedAt)}</td>
+                {actionLabel && onAction && (
+                  <td>
+                    <button
+                      onClick={() => onAction?.(entry)}
+                      className={UI.BtnPrimary()}
+                    >
+                      {actionLabel}
+                    </button>
+                  </td>
+                )}
                 {renderDeleteBtn && (
                   <td>
                     <button
                       onClick={() => setPendingDelete(entry)}
-                      className={UI.BtnPrimary()}
+                      className={UI.BtnDanger()}
                     >
                       Delete
                     </button>{" "}

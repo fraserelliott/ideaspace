@@ -10,7 +10,8 @@
       "@styles": ["src/styles/index.js"],
       "@styles/*": ["src/styles/*"],
       "@pages/*": ["src/pages/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      "@hooks/*": ["src/hooks/*"]
     },
     "moduleResolution": "bundler",
     "jsx": "react-jsx"

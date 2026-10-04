@@ -108,10 +108,21 @@ th {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.dirty {
+  background-color: rgba(80, 160, 255, 0.06) !important;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  width: 100%;
 }
 
 .bg-secondary {
@@ -160,4 +171,41 @@ th {
   background-color: #525252 !important;
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+textarea {
+  resize: none;
+  padding: 0.5em;
+}
+
+.fec-modal-body-inner {
+  height: 100%;
+}
+
+.border-danger {
+  border-color: var(--fes-btn-danger);
+}
+
+.timer {
+    font-variant-numeric: tabular-nums; /* prevents layout jump */
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.timer--warn {
+    color: #b91c1c; /* red-700 */
+}
+
+.timer--alert {
+    color: #dc2626; /* red-600 */
+    animation: timer-pulse 1s linear infinite;
+}
+
+@keyframes timer-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
 }

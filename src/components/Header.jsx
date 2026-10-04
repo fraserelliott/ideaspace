@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { UI } from "@styles";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoggedInTimer } from "./LoggedInTimer";
 import logo from "@assets/logo.png";
 
 const navLinks = {
@@ -18,7 +19,10 @@ export function Header() {
 
   return (
     <div className="fe-d-flex fe-justify-between bg-secondary fe-items-center fe-w-100 box-shadow-subtle fes-bg-secondary">
-      <img src={logo} alt="Logo" className="fe-p-em-1 logo" height="50" />
+      <div className="fe-d-flex fe-items-center">
+        <img src={logo} alt="Logo" className="fe-p-em-1 logo" height="50" />
+        <LoggedInTimer />
+      </div>
       {/* TODO: resize image file once settled on size */}
       <ul className={UI.Navbar()}>
         {renderLinks(navLinks.shared)}

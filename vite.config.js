@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
         "@styles": path.resolve("src/styles"),
         "@pages": path.resolve("src/pages"),
         "@assets": path.resolve("src/assets"),
+        "@hooks": path.resolve("src/hooks"),
       },
     },
   };

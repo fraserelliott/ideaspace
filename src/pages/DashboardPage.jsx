@@ -1,10 +1,14 @@
 import { IdeaTable } from "@/components/IdeaTable";
 import { UI, appearance } from "@/styles";
-import { Modal, OptionalPortal } from "@fraserelliott/fe-components";
-import { useState, useEffect } from "react";
+import {
+  ConfirmDialog,
+  Modal,
+  OptionalPortal,
+} from "@fraserelliott/fe-components";
+import { useState } from "react";
 import { cx } from "@fraserelliott/fe-utilities";
 import { useIdeas } from "@/contexts/IdeasContext";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useToast } from "@fraserelliott/fe-components";
 
 const smallModalStyle = {
@@ -14,6 +18,13 @@ const smallModalStyle = {
 
 export default function DashboardPage() {
   const [newIdeaDialogOpen, setNewIdeaDialogOpen] = useState(false);
+  const [editingIdea, setEditingIdea] = useState(null);
+  const { getIdeaDetailsAsync } = useIdeas();
+
+  const openEditor = async (entry) => {
+    const idea = await getIdeaDetailsAsync(entry.id, true);
+    if (idea) setEditingIdea(idea);
+  };
 
   return (
     <>
@@ -23,19 +34,31 @@ export default function DashboardPage() {
       >
         New Idea
       </button>
-      <IdeaTable renderSlug renderDeleteBtn />
+      <IdeaTable
+        actionLabel="Edit"
+        onAction={openEditor}
+        renderSlug
+        renderDeleteBtn
+      />
       {newIdeaDialogOpen && (
         <NewIdeaModal
           open={newIdeaDialogOpen}
           onOpenChange={setNewIdeaDialogOpen}
-          style={smallModalStyle}
+        />
+      )}
+      {editingIdea && (
+        <EditIdeaModal
+          editingIdea={editingIdea}
+          onOpenChange={(open) => {
+            if (!open) setEditingIdea(null);
+          }}
         />
       )}
     </>
   );
 }
 
-function NewIdeaModal({ open, onOpenChange, style }) {
+function NewIdeaModal({ open, onOpenChange }) {
   const [isValidName, setIsValidName] = useState(null);
   const { validateNameAsync, createIdeaAsync } = useIdeas();
   const { register, handleSubmit, setFocus } = useForm();
@@ -71,9 +94,8 @@ function NewIdeaModal({ open, onOpenChange, style }) {
       <Modal
         open={open}
         onOpenChange={onOpenChange}
-        style={style}
+        style={smallModalStyle}
         heading="New Idea"
-        closeOnEscape
         closeOnBackdropClick={false}
         removeCloseButton
       >
@@ -85,7 +107,7 @@ function NewIdeaModal({ open, onOpenChange, style }) {
           <div className="form-group">
             <label htmlFor="name">Name:</label>
             <input
-              name="name"
+              id="name"
               className={UI.InputPrimary()}
               {...register("name", {
                 onChange: () => setIsValidName(null),
@@ -108,7 +130,7 @@ function NewIdeaModal({ open, onOpenChange, style }) {
             <label htmlFor="isIdea">Is it an idea?</label>
             <input
               type="checkbox"
-              name="isIdea"
+              id="isIdea"
               className={UI.InputPrimary()}
               {...register("isIdea")}
             />
@@ -119,3 +141,207 @@ function NewIdeaModal({ open, onOpenChange, style }) {
     </OptionalPortal>
   );
 }
+
+function EditIdeaModal({ editingIdea, onOpenChange }) {
+  const {
+    control,
+    register,
+    formState: { isDirty, isSubmitting, dirtyFields },
+    handleSubmit,
+    resetDefaultValues,
+    reset,
+  } = useForm({ defaultValues: editingIdea });
+  const { validateNameAsync, validateSlugAsync, updateIdeaAsync } = useIdeas();
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [isValidName, setIsValidName] = useState(null);
+  const [isValidSlug, setIsValidSlug] = useState(null);
+  const { addToastMessage } = useToast();
+
+  const submitForm = async (data) => {
+    const success = await updateIdeaAsync(data);
+    if (success) resetDefaultValues(data);
+  };
+
+  const closeModal = () => {
+    if (isDirty) setOpenConfirm(true);
+    else onOpenChange(false);
+  };
+
+  const discardChanges = () => {
+    reset();
+    setIsValidName(null);
+  };
+
+  const validateNameField = async (name) => {
+    const valid = await validateNameAsync(name, editingIdea.id);
+    if (valid === false) addToastMessage("Name already exists.", "error");
+    setIsValidName(valid);
+  };
+
+  const validateSlugField = async (slug) => {
+    const trimmed = slug.trim();
+    if (trimmed && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)) {
+      addToastMessage(
+        "Slug can only use lowercase letters, numbers, and single hyphens, and cannot start or end with a hyphen.",
+        "error"
+      );
+      setIsValidSlug(false);
+      return;
+    }
+    const valid = await validateSlugAsync(trimmed, editingIdea.id);
+    if (valid === false) addToastMessage("Slug already exists.", "error");
+    setIsValidSlug(valid);
+  };
+
+  return (
+    <OptionalPortal portalTarget={document.body}>
+      <Modal
+        open={editingIdea}
+        onOpenChange={closeModal}
+        style={appearance}
+        closeOnBackdropClick={false}
+        removeCloseButton
+      >
+        <form
+          className={UI.Form("fe-h-100")}
+          autoComplete="off"
+          onSubmit={handleSubmit(submitForm)}
+        >
+          <div className="form-row">
+            <label htmlFor="name">Name:</label>
+            <input
+              id="name"
+              className={UI.InputPrimary(
+                cx(
+                  "fe-grow-1",
+                  isValidName === false && "border-danger",
+                  dirtyFields.name && "dirty"
+                )
+              )}
+              {...register("name", {
+                onChange: () => setIsValidName(null),
+                onBlur: (event) =>
+                  event.target.value.trim() !== "" &&
+                  validateNameField(event.target.value),
+              })}
+            />
+            <label htmlFor="slug">Slug:</label>
+            <input
+              id="slug"
+              className={UI.InputPrimary(
+                cx(
+                  "fe-grow-1",
+                  isValidSlug === false && "border-danger",
+                  dirtyFields.slug && "dirty"
+                )
+              )}
+              {...register("slug", {
+                onChange: () => setIsValidSlug(null),
+                onBlur: (event) =>
+                  event.target.value.trim() !== "" &&
+                  validateSlugField(event.target.value),
+              })}
+            />
+            <label htmlFor="isIdea">Idea?</label>
+            <input
+              id="isIdea"
+              type="checkbox"
+              className={UI.InputPrimary()}
+              {...register("isIdea")}
+            />
+          </div>
+          <div className="form-row">
+            <Controller
+              name="ideatags"
+              control={control}
+              render={({ field }) => (
+                <TagDisplay tags={field.value} onChange={field.onChange} />
+              )}
+            />
+            <button className={UI.BtnPrimary()}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              Select Tags
+            </button>
+          </div>
+          <label htmlFor="summary" className="fe-w-100">
+            Summary:
+          </label>
+          <textarea
+            id="summary"
+            className={UI.InputPrimary(
+              cx("fe-w-100", dirtyFields.summary && "dirty")
+            )}
+            {...register("summary")}
+          />
+          <label htmlFor="content" className="fe-w-100">
+            Content:
+          </label>
+          <textarea
+            id="content"
+            className={UI.InputPrimary(
+              cx("fe-w-100 fe-grow-1", dirtyFields.content && "dirty")
+            )}
+            {...register("content")}
+          />
+          <div className="form-row fe-justify-center fe-gap-5">
+            <button
+              className={UI.BtnDanger()}
+              disabled={!isDirty || isSubmitting}
+              onClick={discardChanges}
+            >
+              Discard
+            </button>
+            <input
+              type="submit"
+              value="Save"
+              className={UI.BtnPrimary()}
+              disabled={!isDirty || isSubmitting}
+            />
+          </div>
+        </form>
+      </Modal>
+      <ConfirmDialog
+        open={openConfirm}
+        onConfirm={() => {
+          setOpenConfirm(false);
+          onOpenChange(false);
+        }}
+        onCancel={() => setOpenConfirm(false)}
+        style={appearance}
+        text="You have unsaved changes. Discard them and close?"
+      />
+    </OptionalPortal>
+  );
+}
+
+const TagDisplay = ({ tags, onRemoveTag }) => {
+  return (
+    <>
+      {tags?.map((tag, index) => {
+        return (
+          <div
+            className="fe-d-flex fe-gap-1 fe-items-center fe-grow-1"
+            key={index}
+          >
+            <span className="fe-mx-1">{tag.name}</span>
+            <button className={UI.BtnDanger()} onClick={() => onRemoveTag(tag)}>
+              X
+            </button>
+          </div>
+        );
+      })}
+    </>
+  );
+};

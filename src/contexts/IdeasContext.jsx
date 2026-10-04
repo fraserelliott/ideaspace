@@ -8,8 +8,8 @@ import {
 } from "react";
 import api from "../api";
 import { useApi } from "./ApiContext.jsx";
-import { useToast } from "@fraserelliott/fe-components";
 import { useAuth } from "./AuthContext";
+import { trimValues } from "@/utils/jsonUtil.js";
 
 const IdeasContext = createContext(undefined);
 
@@ -19,7 +19,6 @@ export function IdeasProvider({ children }) {
   const [ideas, setIdeas] = useState([]);
 
   const { runApiCallback, runApiTransform } = useApi();
-  const { addToastMessage } = useToast();
   const { token, authLoading } = useAuth();
 
   useEffect(() => {
@@ -61,10 +60,21 @@ export function IdeasProvider({ children }) {
     [runApiTransform]
   );
 
+  const validateSlugAsync = useCallback(
+    async (slug, excludeId) =>
+      runApiTransform(
+        api.post("/api/ideaspace/ideas/validate-slug", { slug, excludeId }),
+        (data) => data.valid,
+        (err) => (err?.response?.status === 409 ? false : null)
+      ),
+    [runApiTransform]
+  );
+
   const createIdeaAsync = useCallback(
     async (idea) => {
+      const trimmed = trimValues(idea);
       return await runApiCallback(
-        api.post("/api/ideaspace/ideas", idea),
+        api.post("/api/ideaspace/ideas", trimmed),
         (newIdea) => setIdeas((prev) => [newIdea, ...prev]),
         "Error creating idea."
       );
@@ -83,16 +93,57 @@ export function IdeasProvider({ children }) {
     [runApiCallback]
   );
 
+  const getIdeaDetailsAsync = useCallback(
+    async (id, authenticated) => {
+      return await runApiTransform(
+        api.get(
+          authenticated
+            ? `/api/ideaspace/ideas/dashboard/${id}`
+            : `/api/ideaspace/ideas/${id}`
+        )
+      );
+    },
+    [runApiTransform]
+  );
+
+  const updateIdeaAsync = useCallback(async (idea) => {
+    const trimmed = trimValues(idea);
+    const result = await runApiCallback(
+      api.put(`/api/ideaspace/ideas/dashboard/${trimmed.id}`, trimmed),
+      (updated) =>
+        setIdeas((prev) => [
+          updated,
+          ...prev.filter((entry) => entry.id !== updated.id),
+        ]),
+      "Error updating idea.",
+      (error) => console.log(error)
+    );
+    return result != null;
+  }, []);
+
   const value = useMemo(
     () => ({
       loading,
       error,
       ideas,
       validateNameAsync,
+      validateSlugAsync,
       createIdeaAsync,
       deleteIdeaAsync,
+      getIdeaDetailsAsync,
+      updateIdeaAsync,
     }),
-    [loading, error, ideas, validateNameAsync, createIdeaAsync, deleteIdeaAsync]
+    [
+      loading,
+      error,
+      ideas,
+      validateNameAsync,
+      validateSlugAsync,
+      createIdeaAsync,
+      deleteIdeaAsync,
+      getIdeaDetailsAsync,
+      updateIdeaAsync,
+    ]
   );
 
   return (
