@@ -17,9 +17,21 @@ export function IdeasProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [ideas, setIdeas] = useState([]);
+  const [ideatags, setIdeatags] = useState([]);
 
   const { runApiCallback, runApiTransform } = useApi();
   const { token, authLoading } = useAuth();
+
+  const fetchIdeatagsAsync = useCallback(
+    async () =>
+      runApiCallback(
+        api.get("/api/ideaspace/ideatags"),
+        (d) => setIdeatags(d),
+        "Error fetching ideatags",
+        () => setError(new Error("Failed to load ideatags"))
+      ),
+    [runApiCallback]
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -41,6 +53,7 @@ export function IdeasProvider({ children }) {
           "Error fetching ideas",
           () => mounted && setError(new Error("Failed to load ideas"))
         ),
+        fetchIdeatagsAsync(),
       ]);
       if (mounted) setLoading(false);
     })();
@@ -48,7 +61,7 @@ export function IdeasProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [runApiCallback, token, authLoading]);
+  }, [runApiCallback, fetchIdeatagsAsync, token, authLoading]);
 
   const validateNameAsync = useCallback(
     async (name, excludeId) =>
@@ -84,13 +97,15 @@ export function IdeasProvider({ children }) {
 
   const deleteIdeaAsync = useCallback(
     async (id) => {
-      return await runApiCallback(
+      const result = await runApiCallback(
         api.delete(`/api/ideaspace/ideas/${id}`),
         () => setIdeas((prev) => prev.filter((entry) => entry.id !== id)),
         "Error deleting idea."
       );
+      if (result) await fetchIdeatagsAsync();
+      return result;
     },
-    [runApiCallback]
+    [runApiCallback, fetchIdeatagsAsync]
   );
 
   const getIdeaDetailsAsync = useCallback(
@@ -106,43 +121,64 @@ export function IdeasProvider({ children }) {
     [runApiTransform]
   );
 
-  const updateIdeaAsync = useCallback(async (idea) => {
-    const trimmed = trimValues(idea);
-    const result = await runApiCallback(
-      api.put(`/api/ideaspace/ideas/dashboard/${trimmed.id}`, trimmed),
-      (updated) =>
-        setIdeas((prev) => [
-          updated,
-          ...prev.filter((entry) => entry.id !== updated.id),
-        ]),
-      "Error updating idea.",
-      (error) => console.log(error)
-    );
-    return result != null;
-  }, []);
+  const updateIdeaAsync = useCallback(
+    async (idea) => {
+      const trimmed = trimValues(idea);
+      const result = await runApiCallback(
+        api.put(`/api/ideaspace/ideas/dashboard/${trimmed.id}`, trimmed),
+        (updated) =>
+          setIdeas((prev) => [
+            updated,
+            ...prev.filter((entry) => entry.id !== updated.id),
+          ]),
+        "Error updating idea.",
+        (error) => console.log(error)
+      );
+      if (result != null) await fetchIdeatagsAsync();
+      return result != null;
+    },
+    [runApiCallback, fetchIdeatagsAsync]
+  );
+
+  const addIdeatagAsync = useCallback(
+    async (ideatag) => {
+      const trimmed = trimValues(ideatag);
+      return await runApiCallback(
+        api.post("/api/ideaspace/ideatags", trimmed),
+        (newTag) =>
+          setIdeatags((prev) => [...prev, { ...newTag, usageCount: 0 }]),
+        "Error creating ideatag."
+      );
+    },
+    [runApiTransform]
+  );
 
   const value = useMemo(
     () => ({
       loading,
       error,
       ideas,
+      ideatags,
       validateNameAsync,
       validateSlugAsync,
       createIdeaAsync,
       deleteIdeaAsync,
       getIdeaDetailsAsync,
       updateIdeaAsync,
+      addIdeatagAsync,
     }),
     [
       loading,
       error,
       ideas,
+      ideatags,
       validateNameAsync,
       validateSlugAsync,
       createIdeaAsync,
       deleteIdeaAsync,
       getIdeaDetailsAsync,
       updateIdeaAsync,
+      addIdeatagAsync,
     ]
   );
 

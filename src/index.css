@@ -186,6 +186,10 @@ textarea {
   border-color: var(--fes-btn-danger);
 }
 
+.border-success {
+  border-color: #4caf50;
+}
+
 .timer {
     font-variant-numeric: tabular-nums; /* prevents layout jump */
     padding: 0.25rem 0.5rem;

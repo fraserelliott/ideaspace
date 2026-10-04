@@ -10,6 +10,7 @@ import { cx } from "@fraserelliott/fe-utilities";
 import { useIdeas } from "@/contexts/IdeasContext";
 import { useForm, Controller } from "react-hook-form";
 import { useToast } from "@fraserelliott/fe-components";
+import { TagSelector } from "@/components/TagSelector";
 
 const smallModalStyle = {
   Panel: cx(appearance.Panel, "panel-small"),
@@ -148,8 +149,8 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
     register,
     formState: { isDirty, isSubmitting, dirtyFields },
     handleSubmit,
-    resetDefaultValues,
     reset,
+    watch,
   } = useForm({ defaultValues: editingIdea });
   const { validateNameAsync, validateSlugAsync, updateIdeaAsync } = useIdeas();
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -157,9 +158,17 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
   const [isValidSlug, setIsValidSlug] = useState(null);
   const { addToastMessage } = useToast();
 
-  const submitForm = async (data) => {
+  const formtags = watch("ideatags");
+
+  const submitForm = async (data, event) => {
+    const closeAfterSave =
+      event.nativeEvent.submitter?.value === "Save & Close";
+
     const success = await updateIdeaAsync(data);
-    if (success) resetDefaultValues(data);
+    if (!success) return;
+
+    reset(data);
+    if (closeAfterSave) onOpenChange(false);
   };
 
   const closeModal = () => {
@@ -173,12 +182,26 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
   };
 
   const validateNameField = async (name) => {
-    const valid = await validateNameAsync(name, editingIdea.id);
+    const trimmed = name.trim();
+    if (!dirtyFields.name) {
+      setIsValidName(null);
+      return;
+    }
+    if (!trimmed) {
+      setIsValidName(false);
+      return;
+    }
+    const valid = await validateNameAsync(trimmed, editingIdea.id);
     if (valid === false) addToastMessage("Name already exists.", "error");
     setIsValidName(valid);
   };
 
   const validateSlugField = async (slug) => {
+    if (!dirtyFields.slug) {
+      setIsValidSlug(null);
+      return;
+    }
+
     const trimmed = slug.trim();
     if (trimmed && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)) {
       addToastMessage(
@@ -215,14 +238,13 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
                 cx(
                   "fe-grow-1",
                   isValidName === false && "border-danger",
+                  isValidName && "border-success",
                   dirtyFields.name && "dirty"
                 )
               )}
               {...register("name", {
                 onChange: () => setIsValidName(null),
-                onBlur: (event) =>
-                  event.target.value.trim() !== "" &&
-                  validateNameField(event.target.value),
+                onBlur: (event) => validateNameField(event.target.value),
               })}
             />
             <label htmlFor="slug">Slug:</label>
@@ -232,6 +254,7 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
                 cx(
                   "fe-grow-1",
                   isValidSlug === false && "border-danger",
+                  isValidSlug && "border-success",
                   dirtyFields.slug && "dirty"
                 )
               )}
@@ -250,30 +273,37 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
               {...register("isIdea")}
             />
           </div>
-          <div className="form-row">
+          <div className="fe-d-flex fe-w-100 fe-justify-between">
             <Controller
               name="ideatags"
               control={control}
               render={({ field }) => (
-                <TagDisplay tags={field.value} onChange={field.onChange} />
+                <>
+                  <TagDisplay
+                    tags={field.value}
+                    onChange={field.onChange}
+                    onRemoveTag={(tag) =>
+                      field.onChange(field.value.filter((t) => t.id !== tag.id))
+                    }
+                  />
+                  <TagSelector
+                    buttonText="Select Tags"
+                    selectedTags={formtags}
+                    allowCreate
+                    showUnusedTags
+                    onChange={(tag, selected) => {
+                      const newTags = selected
+                        ? [...field.value, tag]
+                        : field.value.filter(
+                            (existingTag) => existingTag.id !== tag.id
+                          );
+
+                      field.onChange(newTags);
+                    }}
+                  />
+                </>
               )}
             />
-            <button className={UI.BtnPrimary()}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              Select Tags
-            </button>
           </div>
           <label htmlFor="summary" className="fe-w-100">
             Summary:
@@ -301,13 +331,29 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
               disabled={!isDirty || isSubmitting}
               onClick={discardChanges}
             >
-              Discard
+              Discard Changes
             </button>
             <input
               type="submit"
               value="Save"
               className={UI.BtnPrimary()}
-              disabled={!isDirty || isSubmitting}
+              disabled={
+                !isDirty ||
+                isSubmitting ||
+                isValidName === false ||
+                isValidSlug === false
+              }
+            />
+            <input
+              type="submit"
+              value="Save & Close"
+              className={UI.BtnPrimary()}
+              disabled={
+                !isDirty ||
+                isSubmitting ||
+                isValidName === false ||
+                isValidSlug === false
+              }
             />
           </div>
         </form>
@@ -328,7 +374,7 @@ function EditIdeaModal({ editingIdea, onOpenChange }) {
 
 const TagDisplay = ({ tags, onRemoveTag }) => {
   return (
-    <>
+    <div className="fe-d-flex fe-flex-wrap">
       {tags?.map((tag, index) => {
         return (
           <div
@@ -342,6 +388,6 @@ const TagDisplay = ({ tags, onRemoveTag }) => {
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
