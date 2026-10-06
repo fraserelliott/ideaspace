@@ -23,7 +23,7 @@ export function IdeasProvider({ children }) {
   const { token, authLoading } = useAuth();
 
   const fetchIdeatagsAsync = useCallback(
-    async () =>
+    async (mounted) =>
       runApiCallback(
         api.get("/api/ideaspace/ideatags"),
         (d) => setIdeatags(d),
@@ -31,6 +31,22 @@ export function IdeasProvider({ children }) {
         () => setError(new Error("Failed to load ideatags"))
       ),
     [runApiCallback]
+  );
+
+  const fetchIdeasAsync = useCallback(
+    async (mounted) =>
+      runApiCallback(
+        api.get(
+          token ? "/api/ideaspace/ideas/dashboard" : "/api/ideaspace/ideas"
+        ),
+        (d) =>
+          mounted &&
+          setIdeas(
+            d.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+          ),
+        "Error fetching ideas",
+        () => mounted && setError(new Error("Failed to load ideas"))
+      )[runApiCallback]
   );
 
   useEffect(() => {
@@ -41,19 +57,8 @@ export function IdeasProvider({ children }) {
 
     (async () => {
       await Promise.all([
-        runApiCallback(
-          api.get(
-            token ? "/api/ideaspace/ideas/dashboard" : "/api/ideaspace/ideas"
-          ),
-          (d) =>
-            mounted &&
-            setIdeas(
-              d.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-            ),
-          "Error fetching ideas",
-          () => mounted && setError(new Error("Failed to load ideas"))
-        ),
-        fetchIdeatagsAsync(),
+        fetchIdeasAsync(mounted),
+        fetchIdeatagsAsync(mounted),
       ]);
       if (mounted) setLoading(false);
     })();
@@ -102,7 +107,7 @@ export function IdeasProvider({ children }) {
         () => setIdeas((prev) => prev.filter((entry) => entry.id !== id)),
         "Error deleting idea."
       );
-      if (result) await fetchIdeatagsAsync();
+      if (result) await fetchIdeatagsAsync(true);
       return result;
     },
     [runApiCallback, fetchIdeatagsAsync]
@@ -141,7 +146,7 @@ export function IdeasProvider({ children }) {
         "Error updating idea.",
         (error) => console.log(error)
       );
-      if (result != null) await fetchIdeatagsAsync();
+      if (result != null) await fetchIdeatagsAsync(true);
       return result != null;
     },
     [runApiCallback, fetchIdeatagsAsync]
@@ -160,13 +165,42 @@ export function IdeasProvider({ children }) {
     [runApiTransform]
   );
 
-  const deleteIdeatagAsync = useCallback(async (id) => {
-    return runApiCallback(
-      api.delete(`/api/ideaspace/ideatags/${id}`),
-      () => setIdeatags((prev) => prev.filter((t) => t.id !== id)),
-      "Error deleting ideatag"
-    );
-  }, []);
+  const deleteIdeatagAsync = useCallback(
+    async (id) => {
+      return runApiCallback(
+        api.delete(`/api/ideaspace/ideatags/${id}`),
+        () => setIdeatags((prev) => prev.filter((t) => t.id !== id)),
+        "Error deleting ideatag"
+      );
+    },
+    [runApiCallback]
+  );
+
+  const updateTagAsync = useCallback(
+    async (ideatag) => {
+      const result = runApiTransform(
+        api.put(`/api/ideaspace/ideatags/${ideatag.id}`, trimValues(ideatag))
+      );
+      if (result != null) {
+        await fetchIdeasAsync(true);
+        await fetchIdeatagsAsync(true);
+      }
+      return result != null;
+    },
+
+    [runApiCallback]
+  );
+
+  const validateTagNameAsync = useCallback(
+    async (name, excludeId) => {
+      return runApiTransform(
+        api.post("/api/ideaspace/ideatags/validate-name", { name, excludeId }),
+        (data) => data.valid,
+        (err) => (err.response?.status === 409 ? false : null)
+      );
+    },
+    [runApiTransform]
+  );
 
   const value = useMemo(
     () => ({
@@ -183,6 +217,8 @@ export function IdeasProvider({ children }) {
       updateIdeaAsync,
       addIdeatagAsync,
       deleteIdeatagAsync,
+      updateTagAsync,
+      validateTagNameAsync,
     }),
     [
       loading,
@@ -198,6 +234,8 @@ export function IdeasProvider({ children }) {
       updateIdeaAsync,
       deleteIdeatagAsync,
       addIdeatagAsync,
+      updateTagAsync,
+      validateTagNameAsync,
     ]
   );
 
