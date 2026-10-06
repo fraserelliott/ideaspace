@@ -10,20 +10,36 @@ export default function HomePage() {
   const navigate = useNavigate();
   const navigateToIdea = (idea) => navigate(`/ideas/${idea.slug}`);
   const [displayCards, setDisplayCards] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <>
-      <button
-        className={UI.BtnPrimary()}
-        onClick={() => setDisplayCards((prev) => !prev)}
-        style={{ minWidth: "7em" }}
-      >
-        {displayCards ? "Show Table" : "Show Cards"}
-      </button>
+      <div className="fe-d-flex fe-gap-3">
+        <button
+          className={UI.BtnPrimary()}
+          onClick={() => setDisplayCards((prev) => !prev)}
+          style={{ minWidth: "7em" }}
+        >
+          {displayCards ? "Show Table" : "Show Cards"}
+        </button>
+        <input
+          className={UI.InputPrimary()}
+          placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       {!displayCards && (
-        <IdeaTable publishedOnly actionLabel="Open" onAction={navigateToIdea} />
+        <IdeaTable
+          publishedOnly
+          actionLabel="Open"
+          onAction={navigateToIdea}
+          searchTerm={searchTerm}
+        />
       )}
-      {displayCards && <IdeaCards onAction={navigateToIdea} />}
+      {displayCards && (
+        <IdeaCards onAction={navigateToIdea} searchTerm={searchTerm} />
+      )}
     </>
   );
 }
@@ -38,8 +54,6 @@ function IdeaCards({ onAction, searchTerm = "" }) {
         idea.name.toLowerCase().trim().includes(searchTerm.toLowerCase().trim())
     );
   }, [searchTerm, ideas]);
-
-  console.log(filteredIdeas);
 
   if (error) return <ErrorMessage message={error.message} />;
 

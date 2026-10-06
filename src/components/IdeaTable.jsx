@@ -12,14 +12,17 @@ export function IdeaTable({
   renderDeleteBtn,
   actionLabel,
   onAction,
+  searchTerm = "",
 }) {
   const { loading, error, ideas, deleteIdeaAsync } = useIdeas();
   const [pendingDelete, setPendingDelete] = useState(null);
 
-  const displayedIdeas = useMemo(
-    () => (publishedOnly ? ideas.filter((idea) => idea.slug) : ideas),
-    [ideas, publishedOnly]
-  );
+  const displayedIdeas = useMemo(() => {
+    const filteredIdeas = ideas.filter((idea) =>
+      idea.name.toLowerCase().trim().includes(searchTerm.toLowerCase().trim())
+    );
+    return publishedOnly ? filteredIdeas.filter((idea) => idea.slug) : ideas;
+  }, [ideas, publishedOnly, searchTerm]);
 
   if (error) return <ErrorMessage message={error.message} />;
 
