@@ -4,6 +4,7 @@ import { formatDate } from "@/utils/dateUtil";
 import { ErrorMessage } from "./ErrorMessage";
 import { useState, useMemo } from "react";
 import { OptionalPortal, ConfirmDialog } from "@fraserelliott/fe-components";
+import { Ideatags } from "./Ideatags";
 
 export function IdeaTable({
   publishedOnly,
@@ -48,9 +49,15 @@ export function IdeaTable({
         <tbody>
           {displayedIdeas.map((entry) => {
             return (
-              <tr key={entry.id} className="fe-p-em-1">
+              <tr
+                key={entry.id}
+                className="fe-p-em-1"
+                onDoubleClick={() => onAction?.(entry)}
+              >
                 <td>{entry.name}</td>
-                <td>{renderTags(entry.ideatags)}</td>
+                <td>
+                  <Ideatags tags={entry.ideatags} />
+                </td>
                 <td>{entry.isIdea ? "\u2713" : "\u2717"}</td>
                 {renderSlug && <td>{entry.slug}</td>}
                 <td>{formatDate(entry.updatedAt)}</td>
@@ -97,8 +104,4 @@ export function IdeaTable({
       )}
     </div>
   );
-}
-
-function renderTags(tags) {
-  return tags.map((tag) => tag.name).join(" | ");
 }

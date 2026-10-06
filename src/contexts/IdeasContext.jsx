@@ -160,6 +160,14 @@ export function IdeasProvider({ children }) {
     [runApiTransform]
   );
 
+  const deleteIdeatagAsync = useCallback(async (id) => {
+    return runApiCallback(
+      api.delete(`/api/ideaspace/ideatags/${id}`),
+      () => setIdeatags((prev) => prev.filter((t) => t.id !== id)),
+      "Error deleting ideatag"
+    );
+  }, []);
+
   const value = useMemo(
     () => ({
       loading,
@@ -174,6 +182,7 @@ export function IdeasProvider({ children }) {
       getIdeaDetailsBySlugAsync,
       updateIdeaAsync,
       addIdeatagAsync,
+      deleteIdeatagAsync,
     }),
     [
       loading,
@@ -187,6 +196,7 @@ export function IdeasProvider({ children }) {
       getIdeaDetailsByIdAsync,
       getIdeaDetailsBySlugAsync,
       updateIdeaAsync,
+      deleteIdeatagAsync,
       addIdeatagAsync,
     ]
   );

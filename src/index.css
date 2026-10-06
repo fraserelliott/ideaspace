@@ -3,6 +3,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --fes-btn-danger: #b9575f !important;
 }
 
 * {
@@ -61,7 +62,7 @@ html,
     box-shadow 0.12s ease;
   color: var(--text-primary);
   text-decoration: none;
-  border-radius: 0.5em;
+  border-radius: 0.25em;
 }
 
 .navlink:hover {
@@ -102,6 +103,11 @@ th {
 
 .panel-small {
   width: clamp(250px, 80vw, 350px);
+}
+
+.panel-medium {
+  width: 450px !important;
+  height: 450px !important;
 }
 
 .bg-subtle {
@@ -212,4 +218,34 @@ textarea {
     50% {
         opacity: 0.35;
     }
+}
+
+.card {
+  width: 300px;
+  gap: 0.5rem;
+  padding: 1rem;
+  align-items: center;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  background-color: #24344d !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  border-radius: 0.25rem;
+}
+
+.thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }

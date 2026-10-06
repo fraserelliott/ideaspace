@@ -5,12 +5,14 @@ import {
   Modal,
   OptionalPortal,
 } from "@fraserelliott/fe-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cx } from "@fraserelliott/fe-utilities";
 import { useIdeas } from "@/contexts/IdeasContext";
 import { useForm, Controller } from "react-hook-form";
 import { useToast } from "@fraserelliott/fe-components";
 import { TagSelector } from "@/components/TagSelector";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const smallModalStyle = {
   Panel: cx(appearance.Panel, "panel-small"),
@@ -21,6 +23,12 @@ export default function DashboardPage() {
   const [newIdeaDialogOpen, setNewIdeaDialogOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState(null);
   const { getIdeaDetailsByIdAsync } = useIdeas();
+  const { isOptimisticallyLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isOptimisticallyLoggedIn) navigate("/", { replace: true });
+  }, [isOptimisticallyLoggedIn]);
 
   const openEditor = async (entry) => {
     const idea = await getIdeaDetailsByIdAsync(entry.id);

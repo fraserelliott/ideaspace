@@ -2,7 +2,7 @@ import { cx } from "@fraserelliott/fe-utilities/cx";
 
 export const appearance = {
   Panel: "bg-secondary fes-glass-border fes-shadow-subtle fe-rounded-1",
-  BtnPrimary: "btn-primary",
+  BtnPrimary: "btn-primary fes-text-primary",
 };
 
 export const UI = {
@@ -12,7 +12,8 @@ export const UI = {
       ...extra
     ),
   BtnPrimary: (...extra) => cx(UI.Btn(), appearance.BtnPrimary, ...extra),
-  BtnDanger: (...extra) => cx(UI.Btn(), "btn-danger", ...extra),
+  BtnDanger: (...extra) =>
+    cx(UI.Btn(), "btn-danger fes-text-primary", ...extra),
   InputPrimary: (...extra) =>
     cx(
       "bg-subtle fes-text-primary fes-glass-border box-shadow-subtle fe-rounded-1",

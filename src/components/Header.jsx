@@ -8,6 +8,7 @@ const navLinks = {
   loggedIn: [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/images", label: "Images" },
+    { to: "/tags", label: "Tags" },
     { to: "/logout", label: "Logout" },
   ],
   loggedOut: [{ to: "/login", label: "Login" }],
@@ -37,7 +38,10 @@ export function Header() {
 function renderLinks(links) {
   return links.map((entry) => (
     <li key={entry.label}>
-      <NavLink to={entry.to} className={({ isActive }) => UI.NavItem(isActive)}>
+      <NavLink
+        to={entry.to}
+        className={({ isActive }) => UI.NavItem(isActive && "navlink-active")}
+      >
         {entry.label}
       </NavLink>
     </li>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import PageNotFound from "./PageNotFound";
 import MarkdownViewer from "@/components/MarkdownViewer";
 import { UI } from "@/styles";
+import { Ideatags } from "@/components/Ideatags";
 
 export default function IdeaPage() {
   const { slug } = useParams();
@@ -30,9 +31,7 @@ export default function IdeaPage() {
           <span>{idea.isIdea ? "💡 Idea" : "📝 Note"}</span>
         </span>
       </div>
-      <p className="fes-text-muted">
-        {idea.ideatags.map((i) => i.name).join(" | ")}
-      </p>
+      <Ideatags muted tags={idea.ideatags} />
       <MarkdownViewer>{idea.content}</MarkdownViewer>
     </div>
   );
