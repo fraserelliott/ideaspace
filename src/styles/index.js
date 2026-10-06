@@ -16,7 +16,7 @@ export const UI = {
     cx(UI.Btn(), "btn-danger fes-text-primary", ...extra),
   InputPrimary: (...extra) =>
     cx(
-      "bg-subtle fes-text-primary fes-glass-border box-shadow-subtle fe-rounded-1",
+      "bg-subtle fes-text-primary fes-glass-border box-shadow-subtle fe-rounded-1 fe-px-1",
       ...extra
     ),
   Panel: (...extra) =>

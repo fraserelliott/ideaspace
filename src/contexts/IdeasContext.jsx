@@ -143,8 +143,7 @@ export function IdeasProvider({ children }) {
             updated,
             ...prev.filter((entry) => entry.id !== updated.id),
           ]),
-        "Error updating idea.",
-        (error) => console.log(error)
+        "Error updating idea."
       );
       if (result != null) await fetchIdeatagsAsync(true);
       return result != null;

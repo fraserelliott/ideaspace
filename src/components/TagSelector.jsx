@@ -45,10 +45,13 @@ export const TagSelector = ({
 
   const createTag = async () => {
     const created = await addIdeatagAsync({ name: searchTerm.trim() });
-    if (!created) return; // toast already shown
+    if (!created) return;
     onChange?.(created, true);
     setSearchTerm("");
   };
+
+  const exclusiveFiltered = filtered.filter((tag) => tag.exclusive);
+  const nonExclusiveFiltered = filtered.filter((tag) => !tag.exclusive);
 
   return (
     <div style={styles.wrapper}>
@@ -75,7 +78,11 @@ export const TagSelector = ({
       </button>
 
       {open && (
-        <div style={styles.tagContainer} ref={dropdownRef}>
+        <div
+          style={styles.tagContainer}
+          className="fes-glass-border"
+          ref={dropdownRef}
+        >
           <input
             type="text"
             placeholder="Search for tag"
@@ -84,24 +91,26 @@ export const TagSelector = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <ul style={styles.tagList}>
-            {filtered.map((tag) => (
-              <li key={tag.id}>
-                <input
-                  type="checkbox"
-                  checked={isSelected(tag)}
-                  onChange={(e) => toggleTag(tag, e.target.checked)}
-                />
-                <span
-                  style={styles.label}
-                  onClick={() => toggleTag(tag, !isSelected(tag))}
-                >
-                  {tag.name}
-                  {typeof tag.usageCount === "number"
-                    ? ` (${tag.usageCount})`
-                    : ""}
-                </span>
+            {exclusiveFiltered.length > 0 && (
+              <li>
+                <h1 className={UI.Heading()}>Categories</h1>
               </li>
-            ))}
+            )}
+            <TagSection
+              isSelected={isSelected}
+              toggleTag={toggleTag}
+              tags={exclusiveFiltered}
+            />
+            {nonExclusiveFiltered.length > 0 && (
+              <li>
+                <h1 className={UI.Heading()}>Tags</h1>
+              </li>
+            )}
+            <TagSection
+              isSelected={isSelected}
+              toggleTag={toggleTag}
+              tags={nonExclusiveFiltered}
+            />
             {allowCreate && searchTerm.trim() && !exactMatchExists && (
               <li style={styles.newTag} onClick={createTag}>
                 {searchTerm.trim()} (create)
@@ -113,6 +122,29 @@ export const TagSelector = ({
     </div>
   );
 };
+
+function TagSection({ isSelected, toggleTag, tags }) {
+  return (
+    <>
+      {tags.map((tag) => (
+        <li key={tag.id}>
+          <input
+            type="checkbox"
+            checked={isSelected(tag)}
+            onChange={(e) => toggleTag(tag, e.target.checked)}
+          />
+          <span
+            style={styles.label}
+            onClick={() => toggleTag(tag, !isSelected(tag))}
+          >
+            {tag.name}
+            {typeof tag.usageCount === "number" ? ` (${tag.usageCount})` : ""}
+          </span>
+        </li>
+      ))}
+    </>
+  );
+}
 
 const styles = {
   wrapper: {
@@ -130,6 +162,7 @@ const styles = {
     right: "10px",
     whiteSpace: "nowrap",
     zIndex: "100",
+    padding: "4px",
   },
   tagList: { listStyle: "none" },
   input: {

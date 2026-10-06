@@ -69,7 +69,6 @@ export default function TagsPage() {
       setIsValidName(false);
       return;
     }
-    console.log(`validateTagNameAsync(${trimmed}, ${editingTagId}`);
     const valid = await validateTagNameAsync(trimmed, editingTagId);
     if (valid === false) addToastMessage("Name already exists.", "error");
     setIsValidName(valid);
@@ -89,7 +88,7 @@ export default function TagsPage() {
             <tr>
               <th className={UI.Heading()}>Id</th>
               <th className={UI.Heading()}>Name</th>
-              <th className={UI.Heading()}>Exclusive</th>
+              <th className={UI.Heading()}>Category</th>
               <th className={UI.Heading()}>UsageCount</th>
               <th className={UI.Heading()}>Edit</th>
               <th className={UI.Heading()}>Delete</th>

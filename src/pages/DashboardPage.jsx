@@ -13,6 +13,7 @@ import { useToast } from "@fraserelliott/fe-components";
 import { TagSelector } from "@/components/TagSelector";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { ErrorMessage } from "@/components/ErrorMessage";
 
 const smallModalStyle = {
   Panel: cx(appearance.Panel, "panel-small"),
@@ -22,9 +23,10 @@ const smallModalStyle = {
 export default function DashboardPage() {
   const [newIdeaDialogOpen, setNewIdeaDialogOpen] = useState(false);
   const [editingIdea, setEditingIdea] = useState(null);
-  const { getIdeaDetailsByIdAsync } = useIdeas();
   const { isOptimisticallyLoggedIn } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { ideas, loading, error, getIdeaDetailsByIdAsync } = useIdeas();
 
   useEffect(() => {
     if (!isOptimisticallyLoggedIn) navigate("/", { replace: true });
@@ -35,19 +37,33 @@ export default function DashboardPage() {
     if (idea) setEditingIdea(idea);
   };
 
+  if (error) return <ErrorMessage message={error.message} />;
+
+  if (loading || !ideas) return;
+
   return (
     <>
-      <button
-        className={UI.BtnPrimary()}
-        onClick={() => setNewIdeaDialogOpen(true)}
-      >
-        New Idea
-      </button>
+      <div className="fe-d-flex fe-gap-3">
+        <button
+          className={UI.BtnPrimary()}
+          onClick={() => setNewIdeaDialogOpen(true)}
+        >
+          New Idea
+        </button>
+        <input
+          className={UI.InputPrimary()}
+          placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <IdeaTable
         actionLabel="Edit"
         onAction={openEditor}
         renderSlug
         renderDeleteBtn
+        searchTerm={searchTerm}
+        ideas={ideas}
       />
       {newIdeaDialogOpen && (
         <NewIdeaModal

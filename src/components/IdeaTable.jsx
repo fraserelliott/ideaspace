@@ -13,8 +13,9 @@ export function IdeaTable({
   actionLabel,
   onAction,
   searchTerm = "",
+  ideas = [],
 }) {
-  const { loading, error, ideas, deleteIdeaAsync } = useIdeas();
+  const { loading, error, deleteIdeaAsync } = useIdeas();
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const displayedIdeas = useMemo(() => {
@@ -26,7 +27,7 @@ export function IdeaTable({
 
   if (error) return <ErrorMessage message={error.message} />;
 
-  if (loading) return;
+  if (loading || !ideas) return;
 
   const onConfirmDelete = () => {
     setPendingDelete(null);
