@@ -15,7 +15,7 @@ import PageNotFound from "./pages/PageNotFound";
 import ImagePage from "./pages/ImagePage";
 import TagsPage from "./pages/TagsPage";
 
-const repo = "/ideaspace/";
+const repo = "/";
 const basename = import.meta.env.PROD ? repo : "/";
 
 export default function App() {

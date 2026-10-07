@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>IdeaSpace</title>
+
+    <script>
+      const path = location.pathname;
+      const query = location.search.slice(1);
+      const hash = location.hash.slice(1);
+
+      location.replace(
+        "/?p=" +
+          encodeURIComponent(path) +
+          "&q=" +
+          encodeURIComponent(query) +
+          "&h=" +
+          encodeURIComponent(hash)
+      );
+    </script>
+  </head>
+
+  <body></body>
+</html>

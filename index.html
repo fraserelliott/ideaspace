@@ -2,28 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>IdeaSpace</title>
   </head>
+
   <body>
     <script>
-      (function () {
-        const repo = "/ideaspace";
-        const params = new URLSearchParams(location.search);
-        const p = params.get("p");
-        if (p) {
-          const q = params.get("q");
-          const h = params.get("h");
+      const params = new URLSearchParams(location.search);
+      const path = params.get("p");
 
-          history.replaceState(
-            null,
-            "",
-            repo + p + (q ? "?" + q : "") + (h ? "#" + h : ""),
-          );
-        }
-      })();
+      if (path) {
+        const query = params.get("q");
+        const hash = params.get("h");
+
+        history.replaceState(
+          null,
+          "",
+          path +
+            (query ? "?" + query : "") +
+            (hash ? "#" + hash : "")
+        );
+      }
     </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
