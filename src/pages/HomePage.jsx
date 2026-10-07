@@ -12,7 +12,9 @@ import { includeIdea } from "@/utils/filterUtil";
 export default function HomePage() {
   const navigate = useNavigate();
   const navigateToIdea = (idea) => navigate(`/ideas/${idea.slug}`);
-  const [displayCards, setDisplayCards] = useState(false);
+  const [displayCards, setDisplayCards] = useState(() => {
+    return localStorage.getItem("displayCards") === "true";
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const { ideas, ideatags, loading, error } = useIdeas();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,6 +48,10 @@ export default function HomePage() {
     if (!ideas) return null;
     return ideas.filter((idea) => includeIdea(idea, selectedTags, searchTerm));
   }, [ideas, selectedTags, searchTerm]);
+
+  useEffect(() => {
+    localStorage.setItem("displayCards", displayCards);
+  }, [displayCards]);
 
   if (error) return <ErrorMessage message={error.message} />;
 
