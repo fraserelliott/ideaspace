@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <title>IdeaSpace</title>
+    <script type="module" crossorigin src="./assets/index-Gr71yRsA.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DfZMCc4R.css">
+  </head>
+  <body>
+    <script>
+      (function () {
+        const repo = "/ideaspace";
+        const params = new URLSearchParams(location.search);
+        const p = params.get("p");
+        if (p) {
+          const q = params.get("q");
+          const h = params.get("h");
+
+          history.replaceState(
+            null,
+            "",
+            repo + p + (q ? "?" + q : "") + (h ? "#" + h : ""),
+          );
+        }
+      })();
+    </script>
+    <div id="root"></div>
+  </body>
+</html>
