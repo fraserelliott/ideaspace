@@ -90,6 +90,7 @@ function NewIdeaModal({ open, onOpenChange }) {
   const { addToastMessage } = useToast();
 
   const submitForm = async (data) => {
+    if (!data.name) return addToastMessage("Please enter a name.", "error");
     const valid = await validateNameAsync(data.name);
     if (!valid) setIsValidName(valid);
 

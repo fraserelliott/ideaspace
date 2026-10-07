@@ -71,8 +71,11 @@ export function IdeasProvider({ children }) {
   const validateNameAsync = useCallback(
     async (name, excludeId) =>
       runApiTransform(
-        api.post("/api/ideaspace/ideas/validate-name", { name, excludeId }),
-        (data) => data.valid,
+        api.post(
+          "/api/ideaspace/ideas/validate-name",
+          excludeId != null ? { name, excludeId } : { name }
+        ),
+        () => true,
         (err) => (err?.response?.status === 409 ? false : null)
       ),
     [runApiTransform]
